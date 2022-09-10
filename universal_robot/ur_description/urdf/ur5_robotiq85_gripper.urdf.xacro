@@ -1,0 +1,293 @@
+<?xml version="1.0"?>
+<robot name="ur5" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find ur_description)/urdf/ur5_joint_limited_robot.urdf.xacro" />
+  <xacro:include filename="$(find robotiq_description)/urdf/robotiq_85_gripper.urdf.xacro" />
+  
+  <!-- Robotiq Coupler -->
+  <!--  + Height added by the coupler: 8mm -->
+  <!--  + Reference frame: at the middle (4mm) -->
+  <link name="robotiq_coupler">
+    <visual>
+      <geometry>
+        <mesh filename="package://robotiq_description/meshes/robotiq_85_coupler.stl" />
+      </geometry>
+      <material name="flat_black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://robotiq_description/meshes/robotiq_85_coupler.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="2.073e-05   1.45286e-03  -1.1049e-03" rpy="0 0 0" />
+      <mass value="0.168" />
+      <inertia ixx="6.69695624e-05" ixy="5.21511788e-09" ixz="-2.74383009e-08" 
+               iyy="7.85088161e-05" iyz="5.41105193e-07" izz="1.41819717e-04"/>
+    </inertial>
+  </link>
+
+  <joint name="robotiq_coupler_joint" type="fixed">
+    <origin xyz="0 0 0.004" rpy="0 0 ${-pi/2.0}" />
+    <parent link="tool0"/>
+    <child link="robotiq_coupler"/>
+  </joint>
+  <gazebo reference="robotiq_coupler">
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+    <material>Gazebo/FlatBlack</material>
+  </gazebo>
+  <!-- Adding Camera to the robot end effector -->
+  <xacro:property name="camera_width" value="0.04" />
+  <joint name="camera_joint" type="fixed">
+    <!-- camera position and orientation -->
+    <origin xyz="-0.02 0.03 0.05" rpy="0 -1.5707 1.5707"/>
+    <parent link="tool0"/>
+    <child link="camera_link"/>
+  </joint>
+  
+  <link name="camera_link">
+    <visual>
+      <origin rpy="1.57079632679 0 1.57079632679" xyz="0.0149 -0.0175 0"/>
+      <geometry>
+        <mesh filename="package://robotiq_description/meshes/d435.dae"/>
+      </geometry>
+      <material name="camera_aluminum"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 -0.0175 0"/>
+      <geometry>
+        <box size="0.02505 0.09 0.025"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <!-- The following are not reliable values, and should not be used for modeling -->
+      <mass value="0.564"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.003881243" ixy="0.0" ixz="0.0" iyy="0.000498940" iyz="0.0" izz="0.003879257"/>
+    </inertial>
+  </link>
+
+  <!-- Equivalent to the OpenRAVE manipulator denso_robotiq_85_gripper -->
+  <!-- <link name="denso_robotiq_85_gripper" /> -->
+  <!-- <joint name="manipulator_dummy_joint" type="fixed"> -->
+  <!--   <origin xyz="0 0 0.1441" rpy="0 0 0" /> -->
+  <!--   <parent link="robotiq_coupler"/> -->
+  <!--   <child link="denso_robotiq_85_gripper"/> -->
+  <!-- </joint> -->
+  
+  <!-- Attach the robotiq 85 gripper -->
+  <xacro:robotiq_85_gripper prefix="" parent="robotiq_coupler" >
+    <origin xyz="0 0 0.004" rpy="0 ${-pi/2} ${pi}"/>
+  </xacro:robotiq_85_gripper> 
+  
+  <!-- Gazebo FT sensor plugin -->
+  <gazebo reference="wrist_3_joint">
+    <provideFeedback>true</provideFeedback>
+  </gazebo>
+  <gazebo>
+    <plugin name="ft_sensor_plugin" filename="libgazebo_ros_ft_sensor.so">
+      <updateRate>250.0</updateRate>
+      <topicName>ft_sensor/raw</topicName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <jointName>wrist_3_joint</jointName>
+    </plugin>
+  </gazebo>
+  
+  <!-- Gazebo grasping plugin -->
+  <gazebo>
+    <gripper name="gazebo_gripper">
+      <grasp_check>
+        <attach_steps>2</attach_steps>    <!-- default: 20 -->
+        <detach_steps>2</detach_steps>    <!-- default: 40 -->
+        <min_contact_count>3</min_contact_count>
+      </grasp_check>
+      <gripper_link>robotiq_85_left_finger_tip_link</gripper_link>
+      <gripper_link>robotiq_85_right_finger_tip_link</gripper_link>
+      <palm_link>robotiq_85_base_link</palm_link>
+    </gripper>
+  </gazebo>
+
+   <!-- camera depth joints and links -->
+   <joint name="camera_depth_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="camera_link"/>
+    <child link="camera_depth_frame"/>
+  </joint>
+  <link name="camera_depth_frame"/>
+  <joint name="camera_depth_optical_joint" type="fixed">
+    <origin rpy="-1.57079632679 0 -1.57079632679" xyz="0 0 0"/>
+    <parent link="camera_depth_frame"/>
+    <child link="camera_depth_optical_frame"/>
+  </joint>
+  <link name="camera_depth_optical_frame"/>
+  <!-- camera left IR joints and links -->
+  <joint name="camera_left_ir_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0.0 0"/>
+    <parent link="camera_depth_frame"/>
+    <child link="camera_left_ir_frame"/>
+  </joint>
+  <link name="camera_left_ir_frame"/>
+  <joint name="camera_left_ir_optical_joint" type="fixed">
+    <origin rpy="-1.57079632679 0 -1.57079632679" xyz="0 0 0"/>
+    <parent link="camera_left_ir_frame"/>
+    <child link="camera_left_ir_optical_frame"/>
+  </joint>
+  <link name="camera_left_ir_optical_frame"/>
+  <!-- camera right IR joints and links -->
+  <joint name="camera_right_ir_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 -0.05 0"/>
+    <parent link="camera_depth_frame"/>
+    <child link="camera_right_ir_frame"/>
+  </joint>
+  <link name="camera_right_ir_frame"/>
+  <joint name="camera_right_ir_optical_joint" type="fixed">
+    <origin rpy="-1.57079632679 0 -1.57079632679" xyz="0 0 0"/>
+    <parent link="camera_right_ir_frame"/>
+    <child link="camera_right_ir_optical_frame"/>
+  </joint>
+  <link name="camera_right_ir_optical_frame"/>
+  <!-- camera color joints and links -->
+  <joint name="camera_color_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0.015 0"/>
+    <parent link="camera_depth_frame"/>
+    <child link="camera_color_frame"/>
+  </joint>
+  <link name="camera_color_frame"/>
+  <joint name="camera_color_optical_joint" type="fixed">
+    <origin rpy="-1.57079632679 0 -1.57079632679" xyz="0 0 0"/>
+    <parent link="camera_color_frame"/>
+    <child link="camera_color_optical_frame"/>
+  </joint>
+  <link name="camera_color_optical_frame"/>\
+  
+  <!-- camera -->
+  <gazebo reference="camera_link">
+    <self_collide>0</self_collide>
+    <enable_wind>0</enable_wind>
+    <kinematic>0</kinematic>
+    <gravity>1</gravity>
+    <!--<mu>1</mu>-->
+    <mu2>1</mu2>
+    <fdir1>0 0 0</fdir1>
+    <!--<slip1>0</slip1>
+      <slip2>0</slip2>-->
+    <kp>1e+13</kp>
+    <kd>1</kd>
+    <!--<max_vel>0.01</max_vel>
+      <min_depth>0</min_depth>-->
+    <sensor name="cameracolor" type="camera">
+      <camera name="camera">
+        <horizontal_fov>1.21125850088</horizontal_fov>
+        <image>
+          <width>1920</width>
+          <height>1080</height>
+          <format>RGB_INT8</format>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>100</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <always_on>1</always_on>
+      <update_rate>30</update_rate>
+      <visualize>1</visualize>
+    </sensor>
+    <sensor name="cameraired1" type="camera">
+      <camera name="camera">
+        <horizontal_fov>1.4870205227</horizontal_fov>
+        <image>
+          <width>1280</width>
+          <height>720</height>
+          <format>L_INT8</format>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>100</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.05</stddev>
+        </noise>
+      </camera>
+      <always_on>1</always_on>
+      <update_rate>90</update_rate>
+      <visualize>0</visualize>
+    </sensor>
+    <sensor name="cameraired2" type="camera">
+      <camera name="camera">
+        <horizontal_fov>1.4870205227</horizontal_fov>
+        <image>
+          <width>1280</width>
+          <height>720</height>
+          <format>L_INT8</format>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>100</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.05</stddev>
+        </noise>
+      </camera>
+      <always_on>1</always_on>
+      <update_rate>90</update_rate>
+      <visualize>0</visualize>
+    </sensor>
+    <sensor name="cameradepth" type="depth">
+      <camera name="camera">
+        <horizontal_fov>1.4870205227</horizontal_fov>
+        <image>
+          <width>1280</width>
+          <height>720</height>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>10</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.100</stddev>
+        </noise>
+      </camera>
+      <always_on>1</always_on>
+      <update_rate>90</update_rate>
+      <visualize>0</visualize>
+    </sensor>
+  </gazebo>
+  <gazebo>
+    <plugin filename="librealsense_gazebo_plugin.so" name="camera">
+      <prefix>camera</prefix>
+      <depthUpdateRate>60.0</depthUpdateRate>
+      <colorUpdateRate>60.0</colorUpdateRate>
+      <infraredUpdateRate>60.0</infraredUpdateRate>
+      <depthTopicName>depth/image_raw</depthTopicName>
+      <depthCameraInfoTopicName>depth/camera_info</depthCameraInfoTopicName>
+      <colorTopicName>color/image_raw</colorTopicName>
+      <colorCameraInfoTopicName>color/camera_info</colorCameraInfoTopicName>
+      <infrared1TopicName>infra1/image_raw</infrared1TopicName>
+      <infrared1CameraInfoTopicName>infra1/camera_info</infrared1CameraInfoTopicName>
+      <infrared2TopicName>infra2/image_raw</infrared2TopicName>
+      <infrared2CameraInfoTopicName>infra2/camera_info</infrared2CameraInfoTopicName>
+      <colorOpticalframeName>camera_color_optical_frame</colorOpticalframeName>
+      <depthOpticalframeName>camera_depth_optical_frame</depthOpticalframeName>
+      <infrared1OpticalframeName>camera_left_ir_optical_frame</infrared1OpticalframeName>
+      <infrared2OpticalframeName>camera_right_ir_optical_frame</infrared2OpticalframeName>
+      <rangeMinDepth>0.01</rangeMinDepth>
+      <rangeMaxDepth>1</rangeMaxDepth>
+      <pointCloud>true</pointCloud>
+      <pointCloudTopicName>/point_cloud</pointCloudTopicName>
+      <pointCloudCutoff>0.5</pointCloudCutoff>
+    </plugin>
+  </gazebo>
+  
+</robot>

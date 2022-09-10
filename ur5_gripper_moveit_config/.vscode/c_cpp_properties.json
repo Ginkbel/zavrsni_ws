@@ -1,0 +1,33 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/jurica/catkin_ws/devel/include/**",
+        "/home/jurica/ws/devel/include/**",
+        "/opt/ros/kinetic/include/**",
+        "/home/jurica/catkin_ws/src/gpd_ros/include/**",
+        "/home/jurica/catkin_ws/src/robotiq/robotiq_gazebo/include/**",
+        "/home/jurica/catkin_ws/src/geometry2-indigo-devel/tf2/include/**",
+        "/home/jurica/catkin_ws/src/geometry2-indigo-devel/tf2_bullet/include/**",
+        "/home/jurica/catkin_ws/src/geometry2-indigo-devel/tf2_eigen/include/**",
+        "/home/jurica/catkin_ws/src/geometry2-indigo-devel/tf2_geometry_msgs/include/**",
+        "/home/jurica/catkin_ws/src/geometry2-indigo-devel/tf2_kdl/include/**",
+        "/home/jurica/catkin_ws/src/geometry2-indigo-devel/tf2_msgs/include/**",
+        "/home/jurica/catkin_ws/src/geometry2-indigo-devel/tf2_ros/include/**",
+        "/home/jurica/catkin_ws/src/geometry2-indigo-devel/tf2_sensor_msgs/include/**",
+        "/home/jurica/catkin_ws/src/universal_robot/ur_kinematics/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

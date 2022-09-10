@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node name="transform_point_cloud" pkg="transform_point_cloud"
+      type="transform_point_cloud"
+      output="screen" >
+    <param name="target_frame" value="base_link" />
+    <remap from="point_cloud_transformed" to="/cloud_stitched" />
+  </node>
+</launch>
