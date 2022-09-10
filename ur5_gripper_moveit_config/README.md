@@ -6,4 +6,4 @@ To open the UR5e robot in Gazebo simulation run `roslaunch ur5_gripper_moveit de
 
 To use the developed pick and place program, run `rosrun ur5_gripper_moveit pnp_jurica.py` while the simulation in Gazebo is running. 
 
-
+Author: Jurica Vuckovic
