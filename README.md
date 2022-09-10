@@ -1,3 +1,5 @@
 # Zavrsni rad
 
-Svi paketi korišteni za kreiranje projekta u završnom radu.
+Svi paketi korišteni za kreiranje završnog rada.
+
+Autor: Jurica Vučković
